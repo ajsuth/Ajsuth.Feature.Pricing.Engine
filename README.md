@@ -9,7 +9,8 @@ Custom Sitecore Commerce pricing plugin project with extended functionality for 
 - [Disclaimer](#disclaimer)
 
 ## Supported Sitecore Experience Commerce Versions
-- XC 9.3
+- [XC 9.3 (documentation here)](https://github.com/ajsuth/Ajsuth.Feature.Pricing.Engine/tree/release/9.3/master)
+- [XC 10.0 (documentation here)](https://github.com/ajsuth/Ajsuth.Feature.Pricing.Engine/tree/release/10.0/master)
 
 ## Features
 - [Price Book Price Card Links from Sellable Item and Variant Page Views](#price-book-price-card-links-from-sellable-item-and-variant-page-views)
@@ -34,11 +35,12 @@ In the environment configuration files, add the **PricingFeatureEnablementPolicy
 
 ## Installation Instructions
 1. Download the repository.
-2. Add the **Ajsuth.Foundation.Pricing.Engine.csproj** to the _**Sitecore Commerce Engine**_ solution.
-3. In the _**Sitecore Commerce Engine**_ project, add a reference to the **Ajsuth.Foundation.Pricing.Engine** project.
+2. Add the **Ajsuth.Feature.Pricing.Engine.csproj** to the _**Sitecore Commerce Engine**_ solution.
+3. In the _**Sitecore Commerce Engine**_ project, add a reference to the **Ajsuth.Feature.Pricing.Engine** project.
 4. Enable desired features, following [Enabling Features](#enabling-features).
 5. Run the _**Sitecore Commerce Engine**_ from Visual Studio or deploy the solution and run from IIS.
 6. Run the **Bootstrap** command on the _**Sitecore Commerce Engine**_.
+7. Restart all Commerce Engine instances.
 
 ## Known Issues
 | Feature                 | Description | Issue |

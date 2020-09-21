@@ -4,43 +4,35 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
+using Sitecore.Commerce.Core;
+using Sitecore.Commerce.EntityViews;
+using Sitecore.Commerce.Plugin.Catalog;
+using Sitecore.Commerce.Plugin.Pricing;
+using Sitecore.Framework.Conditions;
+using Sitecore.Framework.Pipelines;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+
 namespace Ajsuth.Feature.Pricing.Engine.Pipelines.Blocks
 {
-    using Sitecore.Commerce.Core;
-    using Sitecore.Commerce.EntityViews;
-    using Sitecore.Commerce.Plugin.Catalog;
-    using Sitecore.Commerce.Plugin.Pricing;
-    using Sitecore.Framework.Conditions;
-    using Sitecore.Framework.Pipelines;
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-
-    /// <summary>
-    /// Defines the get catalog view block.
-    /// </summary>
+    /// <summary>Defines the asynchronous executing test pipeline block</summary>
     [PipelineDisplayName(Engine.PricingConstants.Pipelines.Blocks.GetSellableItemPricingView)]
+    /// <seealso cref="GetListViewBlock" />
     public class GetSellableItemPricingViewBlock : GetListViewBlock
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetSellableItemPricingViewBlock"/> class.
-        /// </summary>
+        /// <summary>Initializes a new instance of the <see cref="GetSellableItemPricingViewBlock"/> class.</summary>
         /// <param name="commerceCommander">The commerce commander.</param>
         public GetSellableItemPricingViewBlock(CommerceCommander commerceCommander)
             : base(commerceCommander)
         {
         }
 
-        /// <summary>
-        /// The run.
-        /// </summary>
-        /// <param name="arg">The argument.</param>
+        /// <summary>Executes the pipeline block's code logic.</summary>
+        /// <param name="enitityView">The <see cref="EntityView"/>.</param>
         /// <param name="context">The context.</param>
-        /// <returns>
-        /// The <see cref="Sitecore.Commerce.EntityViews.EntityView" />.
-        /// </returns>
-        public override async Task<EntityView> Run(EntityView entityView, CommercePipelineExecutionContext context)
+        /// <returns>The <see cref="EntityView"/>.</returns>
+        public override async Task<EntityView> RunAsync(EntityView entityView, CommercePipelineExecutionContext context)
         {
             Condition.Requires(entityView).IsNotNull($"{Name}: The argument cannot be null");
 
@@ -57,7 +49,7 @@ namespace Ajsuth.Feature.Pricing.Engine.Pipelines.Blocks
                 return await Task.FromResult(entityView).ConfigureAwait(false);
             }
             
-            var pricingView = entityView.ChildViews.FirstOrDefault(x => x is EntityView && ((EntityView)x).Name == viewsPolicy.SellableItemPricing) as EntityView;
+            var pricingView = entityView.ChildViews.FirstOrDefault(x => x is EntityView && ((EntityView)x).Name.Equals(viewsPolicy.SellableItemPricing, StringComparison.OrdinalIgnoreCase)) as EntityView;
             if (pricingView == null)
             {
                 return await Task.FromResult(entityView).ConfigureAwait(false);
@@ -74,45 +66,43 @@ namespace Ajsuth.Feature.Pricing.Engine.Pipelines.Blocks
             var listName = $"{CommerceEntity.ListName<PriceBook>()}";
             await SetListMetadata(pricingView, listName, context.GetPolicy<KnownPricingActionsPolicy>().PaginatePriceBooks, context).ConfigureAwait(false);
             var entities = await GetEntities<PriceBook>(pricingView, listName, context).ConfigureAwait(false);
-            entities.OfType<PriceBook>()
-                .ForEach(
-                    async book =>
-                    {
-                        var priceCardId = $"{book.Name}-{priceCardName}".ToEntityId<PriceCard>();
-                        var priceCard = await Commander.DoesEntityExists<PriceCard>(context.CommerceContext, priceCardId).ConfigureAwait(false);
-                        if (!priceCard)
-                        {
-                            return;
-                        }
+            foreach (var book in entities.OfType<PriceBook>())
+            {
+                var priceCardId = $"{book.Name}-{priceCardName}".ToEntityId<PriceCard>();
+                var priceCard = await Commander.DoesEntityExists<PriceCard>(context.CommerceContext, priceCardId).ConfigureAwait(false);
+                if (!priceCard)
+                {
+                    continue;
+                }
 
-                        var bookView = new EntityView(book)
-                        {
-                            ItemId = priceCardId,
-                            Name = context.GetPolicy<Policies.KnownPricingViewsPolicy>().SellableItemToPriceCard
-                        };
+                var bookView = new EntityView(book)
+                {
+                    ItemId = priceCardId,
+                    Name = context.GetPolicy<Policies.KnownPricingViewsPolicy>().SellableItemToPriceCard
+                };
 
-                        bookView.Properties.Add(new ViewProperty
-                        {
-                            Name = "ItemId",
-                            RawValue = priceCardId,
-                            IsReadOnly = true,
-                            IsHidden = true
-                        });
-                        bookView.Properties.Add(new ViewProperty
-                        {
-                            Name = "Name",
-                            RawValue = priceCardName,
-                            IsReadOnly = true,
-                            UiType = "EntityLink"
-                        });
-                        bookView.Properties.Add(new ViewProperty
-                        {
-                            Name = "PriceBook",
-                            RawValue = book.Name,
-                            IsReadOnly = true
-                        });
-                        pricingView.ChildViews.Add(bookView);
-                    });
+                bookView.Properties.Add(new ViewProperty
+                {
+                    Name = "ItemId",
+                    RawValue = priceCardId,
+                    IsReadOnly = true,
+                    IsHidden = true
+                });
+                bookView.Properties.Add(new ViewProperty
+                {
+                    Name = "Name",
+                    RawValue = priceCardName,
+                    IsReadOnly = true,
+                    UiType = "EntityLink"
+                });
+                bookView.Properties.Add(new ViewProperty
+                {
+                    Name = "PriceBook",
+                    RawValue = book.Name,
+                    IsReadOnly = true
+                });
+                pricingView.ChildViews.Add(bookView);
+            }
 
             return entityView;
         }

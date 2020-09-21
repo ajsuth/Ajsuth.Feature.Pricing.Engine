@@ -1,25 +1,28 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Description>Sitecore Commerce Plugin Pricing</Description>
-    <VersionPrefix>5.0</VersionPrefix>
     <Authors>Andrew Sutherland</Authors>
-    <TargetFramework>net471</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <PackageTags>$(PackageTags);Commerce;Plugin;Pricing</PackageTags>
-    <PackageIconUrl>http://www.sitecore.net/favicon.ico</PackageIconUrl>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Sitecore.Commerce.Core" Version="5.0.*" />
-    <PackageReference Include="Sitecore.Commerce.Plugin.Catalog" Version="5.0.*" />
-    <PackageReference Include="Sitecore.Commerce.Plugin.Pricing" Version="5.0.*" />
+    <PackageReference Include="Sitecore.Commerce.Core" Version="6.0.*" />
+    <PackageReference Include="Sitecore.Commerce.Plugin.Catalog" Version="6.0.*" />
+    <PackageReference Include="Sitecore.Commerce.Plugin.Pricing" Version="6.0.*" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>NU1603,NU5048</NoWarn>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>NU1603,NU5048</NoWarn>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
 </Project>
